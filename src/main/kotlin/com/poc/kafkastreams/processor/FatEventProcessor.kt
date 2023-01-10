@@ -18,9 +18,9 @@ class FatEventProcessor {
     operator fun invoke(builder: StreamsBuilder,
                         inputTopic: String,
                         outputTopic: String): KStream<String?, Long> =
-        builder.stream(inputTopic, Consumed.with(Serdes.String(), Serdes.String()))
+        builder.stream(inputTopic, Consumed.with(Serdes.Integer(), Serdes.String()))
             .flatMapValues { value: String -> value.lowercase().split("\\W+") }
-            .map { _: String?, value: String? -> KeyValue(value, value) }
+            .map { _: Int?, value: String? -> KeyValue(value, value) }
             .groupByKey(Grouped.with(Serdes.String(), Serdes.String()))
             .count(Materialized.`as`(COUNTS_WORDS_STORE))
             .toStream()
