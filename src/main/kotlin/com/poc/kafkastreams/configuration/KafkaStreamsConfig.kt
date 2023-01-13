@@ -1,9 +1,7 @@
 package com.poc.kafkastreams.configuration
 
-import com.poc.kafkastreams.processor.FatEventProcessor
 import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.common.serialization.Serdes
-import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.StreamsConfig
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -12,6 +10,7 @@ import org.springframework.kafka.annotation.EnableKafka
 import org.springframework.kafka.annotation.EnableKafkaStreams
 import org.springframework.kafka.annotation.KafkaStreamsDefaultConfiguration
 import org.springframework.kafka.config.KafkaStreamsConfiguration
+
 
 @Configuration
 @EnableKafkaStreams
@@ -40,10 +39,4 @@ class KafkaStreamsConfig(
     @Bean
     fun fatEvents(): NewTopic = NewTopic(FAT_EVENTS_TOPIC, numPartition, replicationFactor)
 
-    @Bean
-    fun counts(): NewTopic = NewTopic(COUNT_WORDS_TOPIC, numPartition, replicationFactor)
-
-    @Bean
-    fun fatEventProcessor(streamsBuilder: StreamsBuilder) =
-        FatEventProcessor()(streamsBuilder, FAT_EVENTS_TOPIC, COUNT_WORDS_TOPIC)
 }

@@ -2,6 +2,7 @@ package com.poc.kafkastreams.producer
 
 import io.github.serpro69.kfaker.Faker
 import org.springframework.boot.context.event.ApplicationStartedEvent
+import org.springframework.context.annotation.Profile
 import org.springframework.context.event.EventListener
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Component
@@ -11,6 +12,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.toJavaDuration
 
 @Component
+@Profile("hobbit")
 class HobbitProducer(
     private val kafkaTemplate: KafkaTemplate<Int, String>
 ) {
