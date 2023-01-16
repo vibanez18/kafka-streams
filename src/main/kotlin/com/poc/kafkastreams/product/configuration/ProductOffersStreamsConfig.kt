@@ -28,14 +28,14 @@ class ProductOffersStreamsConfig {
     @Bean
     fun categoriesAttributesTopic(): NewTopic = NewTopic(CATEGORIES_ATTRIBUTES_TOPIC, NUM_PARTITION, REPLICATION_FACTOR)
 
-    @Bean("productOffersBuilder")
-    fun productOffersBuilder(streamsConfig: KafkaStreamsConfiguration): FactoryBean<StreamsBuilder> =
-        StreamsBuilderFactoryBean(streamsConfig)
+//    @Bean("productOffersBuilder")
+//    fun productOffersBuilder(streamsConfig: KafkaStreamsConfiguration): FactoryBean<StreamsBuilder> =
+//        StreamsBuilderFactoryBean(streamsConfig)
 
-    @Bean
-    fun fatEventProcessor(@Qualifier("productOffersBuilder") streamsBuilder: StreamsBuilder) =
-        ProductOfferProcessor()(streamsBuilder,
-            PRODUCT_OFFER_FAT_EVENT_TOPIC,
-            CATEGORIES_ATTRIBUTES_TOPIC
-        )
+//    @Bean
+//    fun fatEventProcessor(@Qualifier("productOffersBuilder") streamsBuilder: StreamsBuilder) =
+//        ProductOfferProcessor()(streamsBuilder,
+//            PRODUCT_OFFER_FAT_EVENT_TOPIC,
+//            CATEGORIES_ATTRIBUTES_TOPIC
+//        )
 }

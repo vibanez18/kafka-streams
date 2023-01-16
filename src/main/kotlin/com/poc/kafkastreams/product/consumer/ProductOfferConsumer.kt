@@ -1,0 +1,16 @@
+package com.poc.kafkastreams.product.consumer
+
+import com.poc.kafkastreams.product.model.ProductOffers
+import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.logging.log4j.kotlin.Logging
+import org.springframework.context.annotation.Profile
+import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.stereotype.Component
+
+@Component
+@Profile("product-offers")
+class ProductOfferConsumer: Logging {
+    @KafkaListener(topics = ["product_offer_fat_event_topic"], groupId = "consumer-pr-offers-streams-app")
+    operator fun invoke(record: ConsumerRecord<String, ProductOffers>) =
+        logger.info(("received = " + record.value().toString() + " with key " + record.key()))
+}
