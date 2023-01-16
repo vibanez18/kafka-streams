@@ -9,7 +9,7 @@ import org.apache.kafka.streams.kstream.KStream
 import org.apache.kafka.streams.kstream.Materialized
 import org.apache.kafka.streams.kstream.Produced
 
-class FatEventCountWordsProcessor {
+class CountWordsProcessor {
 
     companion object {
         private const val COUNTS_WORDS_STORE = "count-words-store"

@@ -1,6 +1,6 @@
 package com.poc.kafkastreams.configuration
 
-import com.poc.kafkastreams.processor.FatEventCountWordsProcessor
+import com.poc.kafkastreams.processor.CountWordsProcessor
 import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.streams.StreamsBuilder
 import org.springframework.beans.factory.FactoryBean
@@ -15,18 +15,31 @@ import org.springframework.kafka.config.StreamsBuilderFactoryBean
 @Profile("hobbit")
 class HobbitStreamsConfiguration {
 
-    @Bean
-    fun counts(): NewTopic = NewTopic(KafkaStreamsConfig.COUNT_WORDS_TOPIC, KafkaStreamsConfig.numPartition, KafkaStreamsConfig.replicationFactor)
+    companion object {
+        const val NUM_PARTITION = 3
+        const val REPLICATION_FACTOR: Short = 1
+        const val COUNT_WORDS_TOPIC = "count-words"
+        const val HOBBIT_QUOTES_TOPIC = "hobbit_quotes"
+    }
 
+    @Bean
+    fun counts(): NewTopic = NewTopic(COUNT_WORDS_TOPIC, NUM_PARTITION, REPLICATION_FACTOR)
+
+    @Bean
+    fun hobbitInputTopic(): NewTopic = NewTopic(
+        HOBBIT_QUOTES_TOPIC,
+        NUM_PARTITION,
+        REPLICATION_FACTOR
+    )
 
     @Bean("hobbitStreamBuilder")
-    fun myKStreamBuilder(streamsConfig: KafkaStreamsConfiguration): FactoryBean<StreamsBuilder> =
+    fun hobbitStreamBuilder(streamsConfig: KafkaStreamsConfiguration): FactoryBean<StreamsBuilder> =
         StreamsBuilderFactoryBean(streamsConfig)
 
     @Bean
     fun fatEventProcessor(@Qualifier("hobbitStreamBuilder") streamsBuilder: StreamsBuilder) =
-        FatEventCountWordsProcessor()(streamsBuilder,
-            KafkaStreamsConfig.FAT_EVENTS_TOPIC,
-            KafkaStreamsConfig.COUNT_WORDS_TOPIC
+        CountWordsProcessor()(streamsBuilder,
+            HOBBIT_QUOTES_TOPIC,
+            COUNT_WORDS_TOPIC
         )
 }

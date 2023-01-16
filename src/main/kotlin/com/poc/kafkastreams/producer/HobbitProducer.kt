@@ -1,5 +1,6 @@
 package com.poc.kafkastreams.producer
 
+import com.poc.kafkastreams.configuration.HobbitStreamsConfiguration
 import io.github.serpro69.kfaker.Faker
 import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.annotation.Profile
@@ -25,7 +26,7 @@ class HobbitProducer(
 
         Flux.zip(interval, quotes)
             .map { kafkaTemplate.send(
-                    "fat_events",
+                HobbitStreamsConfiguration.HOBBIT_QUOTES_TOPIC,
                     faker.random.nextInt(),
                     it.t2
                 )

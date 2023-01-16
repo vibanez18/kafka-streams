@@ -1,6 +1,5 @@
 package com.poc.kafkastreams.configuration
 
-import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsConfig
 import org.springframework.beans.factory.annotation.Value
@@ -19,10 +18,6 @@ class KafkaStreamsConfig(
     @Value(value = "\${spring.kafka.bootstrap-servers}") private val bootstrapAddress: String
 ) {
     companion object {
-        const val numPartition = 3
-        const val replicationFactor: Short = 1
-        const val COUNT_WORDS_TOPIC = "count-words"
-        const val FAT_EVENTS_TOPIC = "fat_events"
         const val APPLICATION_ID_CONFIG = "streams-app"
     }
 
@@ -35,8 +30,5 @@ class KafkaStreamsConfig(
         props[StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG] = Serdes.Long().javaClass.name
         return KafkaStreamsConfiguration(props)
     }
-
-    @Bean
-    fun fatEvents(): NewTopic = NewTopic(FAT_EVENTS_TOPIC, numPartition, replicationFactor)
 
 }
