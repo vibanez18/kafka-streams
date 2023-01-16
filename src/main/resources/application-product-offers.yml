@@ -3,11 +3,7 @@ spring:
     bootstrap-servers: localhost:9092
     producer:
       client-id: product-offers-producer
-      key-serializer: org.apache.kafka.common.serialization.IntegerSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
-      key-deserializer: org.apache.kafka.common.serialization.IntegerDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonSerializer
       client-id: product-offers-consumer
     streams:
       application-id: product-offers-stream
