@@ -1,4 +1,4 @@
-package com.poc.kafkastreams.processor
+package com.poc.kafkastreams.hobbit.processor
 
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.KeyValue

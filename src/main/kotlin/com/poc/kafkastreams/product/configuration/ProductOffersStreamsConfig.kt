@@ -1,6 +1,6 @@
-package com.poc.kafkastreams.configuration
+package com.poc.kafkastreams.product.configuration
 
-import com.poc.kafkastreams.processor.ProductOfferProcessor
+import com.poc.kafkastreams.product.processor.ProductOfferProcessor
 import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.streams.StreamsBuilder
 import org.springframework.beans.factory.FactoryBean
@@ -36,5 +36,6 @@ class ProductOffersStreamsConfig {
     fun fatEventProcessor(@Qualifier("productOffersBuilder") streamsBuilder: StreamsBuilder) =
         ProductOfferProcessor()(streamsBuilder,
             PRODUCT_OFFER_FAT_EVENT_TOPIC,
-            CATEGORIES_ATTRIBUTES_TOPIC)
+            CATEGORIES_ATTRIBUTES_TOPIC
+        )
 }

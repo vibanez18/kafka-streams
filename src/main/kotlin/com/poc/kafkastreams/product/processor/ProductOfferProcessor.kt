@@ -1,4 +1,4 @@
-package com.poc.kafkastreams.processor
+package com.poc.kafkastreams.product.processor
 
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.kstream.KStream

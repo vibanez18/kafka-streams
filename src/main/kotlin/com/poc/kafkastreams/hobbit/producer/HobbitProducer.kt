@@ -1,6 +1,6 @@
-package com.poc.kafkastreams.producer
+package com.poc.kafkastreams.hobbit.producer
 
-import com.poc.kafkastreams.configuration.HobbitStreamsConfiguration
+import com.poc.kafkastreams.hobbit.configuration.HobbitStreamsConfiguration
 import io.github.serpro69.kfaker.Faker
 import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.annotation.Profile

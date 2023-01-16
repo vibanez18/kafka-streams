@@ -1,6 +1,6 @@
-package com.poc.kafkastreams.configuration
+package com.poc.kafkastreams.hobbit.configuration
 
-import com.poc.kafkastreams.processor.CountWordsProcessor
+import com.poc.kafkastreams.hobbit.processor.CountWordsProcessor
 import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.streams.StreamsBuilder
 import org.springframework.beans.factory.FactoryBean

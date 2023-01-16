@@ -1,4 +1,4 @@
-package com.poc.kafkastreams.consumer
+package com.poc.kafkastreams.hobbit.consumer
 
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.logging.log4j.kotlin.Logging
