@@ -39,13 +39,17 @@ class ProductOffersStreamsConfig(
         const val REPLICATION_FACTOR: Short = 1
         const val CATEGORIES_ATTRIBUTES_TOPIC = "categories_attributes_topic"
         const val PRODUCT_OFFER_FAT_EVENT_TOPIC = "product_offer_fat_event_topic"
+        const val COMMIT_INTERVAL_KTABLE = 1000
+        const val KTABLE_APP_ID = "ktable-id"
     }
 
     @Bean
-    fun productOfferFatEventTopic(): NewTopic = NewTopic(PRODUCT_OFFER_FAT_EVENT_TOPIC, NUM_PARTITION, REPLICATION_FACTOR)
+    fun productOfferFatEventTopic(): NewTopic =
+        NewTopic(PRODUCT_OFFER_FAT_EVENT_TOPIC, NUM_PARTITION, REPLICATION_FACTOR)
 
     @Bean
-    fun categoriesAttributesTopic(): NewTopic = NewTopic(CATEGORIES_ATTRIBUTES_TOPIC, NUM_PARTITION, REPLICATION_FACTOR)
+    fun categoriesAttributesTopic(): NewTopic =
+        NewTopic(CATEGORIES_ATTRIBUTES_TOPIC, NUM_PARTITION, REPLICATION_FACTOR)
 
     @Bean
     fun productOffersProducerFactory(): ProducerFactory<Int, ProductOffers> {
@@ -81,16 +85,15 @@ class ProductOffersStreamsConfig(
         StreamsBuilderFactoryBean(streamsConfig)
 
     @Bean("productOffersKTableBuilder")
-    fun productOffersKTableBuilder(streamsConfig: KafkaStreamsConfiguration): FactoryBean<StreamsBuilder> {
-
-        val config = KafkaStreamsConfiguration(mapOf(
-            StreamsConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapAddress,
-            StreamsConfig.APPLICATION_ID_CONFIG to "ktable-id",
-            StreamsConfig.COMMIT_INTERVAL_MS_CONFIG to 1000
-        ))
-
-        return StreamsBuilderFactoryBean(config)
-    }
+    fun productOffersKTableBuilder() = StreamsBuilderFactoryBean(
+        KafkaStreamsConfiguration(
+            mapOf<String, Any>(
+                StreamsConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapAddress,
+                StreamsConfig.APPLICATION_ID_CONFIG to KTABLE_APP_ID,
+                StreamsConfig.COMMIT_INTERVAL_MS_CONFIG to COMMIT_INTERVAL_KTABLE
+            )
+        )
+    )
 
 
     @Bean
