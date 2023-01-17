@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 @Component
 @Profile("product-offers")
 class ProductOfferConsumer: Logging {
-    @KafkaListener(topics = ["product_offer_fat_event_topic"], groupId = "consumer-pr-offers-streams-app")
+    @KafkaListener(topics = ["categories_attributes_topic"], groupId = "consumer-pr-offers-streams-app")
     operator fun invoke(record: ConsumerRecord<Int, ProductOffers>) =
         logger.info("received = ${record.value()} with key ${record.key()}")
 }

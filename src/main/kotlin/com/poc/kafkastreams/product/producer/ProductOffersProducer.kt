@@ -2,6 +2,7 @@ package com.poc.kafkastreams.product.producer
 
 import com.poc.kafkastreams.product.configuration.ProductOffersStreamsConfig
 import com.poc.kafkastreams.product.model.ProductOffers
+import com.poc.kafkastreams.product.model.ProductOffersFactory
 import io.github.serpro69.kfaker.Faker
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.event.ApplicationStartedEvent
