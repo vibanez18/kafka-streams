@@ -12,3 +12,4 @@ fun Long.Companion.randomLongs(): List<Long> =
         this.randomLong(),
         this.randomLong()
     )
+fun String.Companion.randomUUID(): String = Faker().random.nextUUID()

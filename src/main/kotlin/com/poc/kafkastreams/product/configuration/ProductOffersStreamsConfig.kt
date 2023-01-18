@@ -1,8 +1,7 @@
 package com.poc.kafkastreams.product.configuration
 
 import com.poc.kafkastreams.product.model.ProductOffers
-import com.poc.kafkastreams.product.topologies.ProductOfferProcessor
-import com.poc.kafkastreams.product.topologies.ProductOffersKTable
+import com.poc.kafkastreams.product.topologies.ExtractorProductOffersFunction
 import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -10,7 +9,6 @@ import org.apache.kafka.common.serialization.IntegerDeserializer
 import org.apache.kafka.common.serialization.IntegerSerializer
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.StreamsConfig
-import org.springframework.beans.factory.FactoryBean
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -80,10 +78,6 @@ class ProductOffersStreamsConfig(
         return factory
     }
 
-    @Bean("productOffersBuilder")
-    fun productOffersBuilder(streamsConfig: KafkaStreamsConfiguration): FactoryBean<StreamsBuilder> =
-        StreamsBuilderFactoryBean(streamsConfig)
-
     @Bean("productOffersKTableBuilder")
     fun productOffersKTableBuilder() = StreamsBuilderFactoryBean(
         KafkaStreamsConfiguration(
@@ -98,12 +92,5 @@ class ProductOffersStreamsConfig(
 
     @Bean
     fun productOffersKTable(@Qualifier("productOffersKTableBuilder") streamsBuilder: StreamsBuilder) =
-        ProductOffersKTable()(streamsBuilder, PRODUCT_OFFER_FAT_EVENT_TOPIC)
-
-    @Bean
-    fun fatEventProcessor(@Qualifier("productOffersBuilder") streamsBuilder: StreamsBuilder) =
-        ProductOfferProcessor()(streamsBuilder,
-            PRODUCT_OFFER_FAT_EVENT_TOPIC,
-            CATEGORIES_ATTRIBUTES_TOPIC
-        )
+        ExtractorProductOffersFunction()(streamsBuilder, PRODUCT_OFFER_FAT_EVENT_TOPIC, CATEGORIES_ATTRIBUTES_TOPIC)
 }

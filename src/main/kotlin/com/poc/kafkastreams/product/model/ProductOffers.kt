@@ -11,17 +11,9 @@ data class ProductOffers(
     val masterCategoryId: Long,
     @JsonProperty("merchandisingCategories")
     val merchandisingCategories: MerchandisingCategories,
-    @JsonProperty("state")
-    val state: ProductOffersState = ProductOffersState.DEFAULT
-) {
-    fun process(offer: ProductOffers): ProductOffers = if (this.masterCategoryId == offer.masterCategoryId
-        && this.merchandisingCategories.main == offer.merchandisingCategories.main
-        && this.merchandisingCategories.secondary.containsAll(offer.merchandisingCategories.secondary)
-    )
-        this.copy(state = ProductOffersState.MATCH)
-    else
-        this.copy(state = ProductOffersState.NO_MATCH)
-}
+    @JsonProperty("sellerSpecificInformation")
+    val sellerSpecificInformation: List<SellerSpecificInformation>
+)
 
 data class MerchandisingCategories(
     @JsonProperty("main")
@@ -30,7 +22,20 @@ data class MerchandisingCategories(
     val secondary: List<Long> = emptyList()
 )
 
-enum class ProductOffersState { DEFAULT, MATCH, NO_MATCH }
+data class SellerSpecificInformation(@JsonProperty("offer") val offer: Offer)
+
+data class Offer(
+    @JsonProperty("offerId")
+    val offerId: String,
+    @JsonProperty("pricing")
+    val pricing: Pricing)
+
+data class Pricing(
+    @JsonProperty("priceVatIncluded")
+    val priceVatIncluded: Double,
+    @JsonProperty("currencySymbol")
+    val currencySymbol: String)
+
 
 class ProductOffersSerde private constructor(){
     companion object {

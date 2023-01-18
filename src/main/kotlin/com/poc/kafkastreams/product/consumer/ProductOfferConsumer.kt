@@ -7,10 +7,10 @@ import org.springframework.context.annotation.Profile
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
 
-@Component
-@Profile("product-offers")
+//@Component
+//@Profile("product-offers")
 class ProductOfferConsumer: Logging {
-    @KafkaListener(topics = ["categories_attributes_topic"], groupId = "consumer-pr-offers-streams-app")
+//    @KafkaListener(topics = ["categories_attributes_topic"], groupId = "consumer-pr-offers-streams-app")
     operator fun invoke(record: ConsumerRecord<Int, ProductOffers>) =
         logger.info("received = ${record.value()} with key ${record.key()}")
 }
