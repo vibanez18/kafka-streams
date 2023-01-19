@@ -93,9 +93,6 @@ class ProductOffersStreamsConfig(
 
 
     @Bean
-    fun productOffersKTable(
-        @Qualifier("productOffersKTableBuilder") streamsBuilder: StreamsBuilder,
-        productOffersProcessorSupplier: ProductOffersProcessorSupplier,
-        extractorProductOffersFunction: ExtractorProductOffersFunction) =
-        extractorProductOffersFunction(streamsBuilder, PRODUCT_OFFER_FAT_EVENT_TOPIC, CATEGORIES_ATTRIBUTES_TOPIC)
+    fun productOffersKTable(extractorProductOffersFunction: ExtractorProductOffersFunction) =
+        extractorProductOffersFunction(PRODUCT_OFFER_FAT_EVENT_TOPIC, CATEGORIES_ATTRIBUTES_TOPIC)
 }
