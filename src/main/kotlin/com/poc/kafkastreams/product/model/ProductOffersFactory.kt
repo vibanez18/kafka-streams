@@ -33,12 +33,5 @@ class ProductOffersFactory private constructor() {
                 )
             )
         )
-//        fun withEmptyValues(): ProductOffers = ProductOffers(
-//            mmId = 0,
-//            masterCategoryId = 0,
-//            merchandisingCategories = MerchandisingCategories(
-//                main = 0
-//            )
-//        )
     }
 }

@@ -2,11 +2,12 @@ package com.poc.kafkastreams.product.configuration
 
 import com.poc.kafkastreams.product.model.ProductOffers
 import com.poc.kafkastreams.product.topologies.ExtractorProductOffersFunction
+import com.poc.kafkastreams.product.topologies.ProductOffersProcessorSupplier
 import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
-import org.apache.kafka.common.serialization.IntegerDeserializer
-import org.apache.kafka.common.serialization.IntegerSerializer
+import org.apache.kafka.common.serialization.LongDeserializer
+import org.apache.kafka.common.serialization.LongSerializer
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.StreamsConfig
 import org.springframework.beans.factory.annotation.Qualifier
@@ -30,7 +31,6 @@ import org.springframework.kafka.support.serializer.JsonSerializer
 @Profile("product-offers")
 class ProductOffersStreamsConfig(
     @Value(value = "\${spring.kafka.bootstrap-servers}") private val bootstrapAddress: String
-
 ) {
     companion object {
         const val NUM_PARTITION = 3
@@ -50,30 +50,30 @@ class ProductOffersStreamsConfig(
         NewTopic(CATEGORIES_ATTRIBUTES_TOPIC, NUM_PARTITION, REPLICATION_FACTOR)
 
     @Bean
-    fun productOffersProducerFactory(): ProducerFactory<Int, ProductOffers> {
+    fun productOffersProducerFactory(): ProducerFactory<Long, ProductOffers> {
         val configProps: MutableMap<String, Any> = HashMap()
         configProps[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapAddress
-        configProps[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = IntegerSerializer::class.java
+        configProps[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = LongSerializer::class.java
         configProps[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JsonSerializer::class.java
         return DefaultKafkaProducerFactory(configProps)
     }
 
     @Bean("product-offers")
-    fun productOffersKafkaTemplate(): KafkaTemplate<Int, ProductOffers> {
+    fun productOffersKafkaTemplate(): KafkaTemplate<Long, ProductOffers> {
         return KafkaTemplate(productOffersProducerFactory())
     }
 
     @Bean
-    fun  productOffersConsumerFactory(): ConsumerFactory<Int, ProductOffers> {
+    fun  productOffersConsumerFactory(): ConsumerFactory<Long, ProductOffers> {
         val props: MutableMap<String, Any> = HashMap()
         props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapAddress
 
-        return DefaultKafkaConsumerFactory(props, IntegerDeserializer(), JsonDeserializer(ProductOffers::class.java))
+        return DefaultKafkaConsumerFactory(props, LongDeserializer(), JsonDeserializer(ProductOffers::class.java))
     }
 
     @Bean
-    fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<Int, ProductOffers> {
-        val factory = ConcurrentKafkaListenerContainerFactory<Int, ProductOffers>()
+    fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<Long, ProductOffers> {
+        val factory = ConcurrentKafkaListenerContainerFactory<Long, ProductOffers>()
         factory.consumerFactory = productOffersConsumerFactory()
         return factory
     }
@@ -84,13 +84,18 @@ class ProductOffersStreamsConfig(
             mapOf<String, Any>(
                 StreamsConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapAddress,
                 StreamsConfig.APPLICATION_ID_CONFIG to KTABLE_APP_ID,
-                StreamsConfig.COMMIT_INTERVAL_MS_CONFIG to COMMIT_INTERVAL_KTABLE
+                StreamsConfig.COMMIT_INTERVAL_MS_CONFIG to COMMIT_INTERVAL_KTABLE,
+                StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG to LongSerializer::class.java,
+                StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG to JsonSerializer::class.java
             )
         )
     )
 
 
     @Bean
-    fun productOffersKTable(@Qualifier("productOffersKTableBuilder") streamsBuilder: StreamsBuilder) =
-        ExtractorProductOffersFunction()(streamsBuilder, PRODUCT_OFFER_FAT_EVENT_TOPIC, CATEGORIES_ATTRIBUTES_TOPIC)
+    fun productOffersKTable(
+        @Qualifier("productOffersKTableBuilder") streamsBuilder: StreamsBuilder,
+        productOffersProcessorSupplier: ProductOffersProcessorSupplier,
+        extractorProductOffersFunction: ExtractorProductOffersFunction) =
+        extractorProductOffersFunction(streamsBuilder, PRODUCT_OFFER_FAT_EVENT_TOPIC, CATEGORIES_ATTRIBUTES_TOPIC)
 }

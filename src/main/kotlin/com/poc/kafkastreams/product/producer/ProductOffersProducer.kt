@@ -21,24 +21,24 @@ import kotlin.time.toJavaDuration
 @Component
 @Profile("product-offers")
 class ProductOffersProducer(
-    @Qualifier("product-offers")private val kafkaTemplate: KafkaTemplate<Int, ProductOffers>
+    @Qualifier("product-offers")private val kafkaTemplate: KafkaTemplate<Long, ProductOffers>
 ) {
     companion object {
         private const val MM_EVENT_STATE_HEADER = "mm-event-state"
     }
 
     @EventListener(ApplicationStartedEvent::class)
-    operator fun invoke(): Flux<CompletableFuture<SendResult<Int, ProductOffers>>> = Flux.zip(
+    operator fun invoke(): Flux<CompletableFuture<SendResult<Long, ProductOffers>>> = Flux.zip(
         Flux.interval(1000.milliseconds.toJavaDuration()),
         Flux.fromStream(Stream.generate { createProducerRecord() })
     ).map { kafkaTemplate.send(it.t2) }
 
-    private fun createProducerRecord(): ProducerRecord<Int, ProductOffers> = ProducerRecord(
+    private fun createProducerRecord(): ProducerRecord<Long, ProductOffers> = ProducerRecord(
         ProductOffersStreamsConfig.PRODUCT_OFFER_FAT_EVENT_TOPIC,
-        Faker().random.nextLong().toInt(),
+        Faker().random.nextLong(),
         ProductOffersFactory.withRandomCategories()
     )
         .apply { this.headers().add(MM_EVENT_STATE_HEADER, HeaderType.CREATED.toString().toByteArray()) }
 }
 
-enum class HeaderType { CREATED, UPDATED }
+enum class HeaderType { CREATED, UPDATED, DELETED }
