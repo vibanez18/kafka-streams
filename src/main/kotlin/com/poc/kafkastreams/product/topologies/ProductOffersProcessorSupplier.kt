@@ -2,6 +2,7 @@ package com.poc.kafkastreams.product.topologies
 
 
 import com.poc.kafkastreams.product.model.ProductBestOffer
+import com.poc.kafkastreams.product.model.ProductBestOffersSerde
 import com.poc.kafkastreams.product.model.ProductOffers
 import com.poc.kafkastreams.product.model.ProductOffersSerde
 import org.apache.kafka.common.serialization.Serdes
@@ -18,7 +19,7 @@ class ProductOffersProcessorSupplier: ProcessorSupplier<Long, ProductOffers, Lon
         val STORE_BUILDER = Stores.keyValueStoreBuilder(
             Stores.persistentKeyValueStore(STORE_NAME),
             Serdes.Long(),
-            ProductOffersSerde.withTrustedPackagesAndValueType()
+            ProductBestOffersSerde.withTrustedPackagesAndValueType()
         )!!
     }
 

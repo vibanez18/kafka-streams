@@ -10,10 +10,11 @@ import org.apache.kafka.streams.processor.api.Processor
 import org.apache.kafka.streams.processor.api.ProcessorContext
 import org.apache.kafka.streams.processor.api.Record
 import org.apache.kafka.streams.state.KeyValueStore
+import org.apache.logging.log4j.kotlin.Logging
 import java.lang.RuntimeException
 import java.time.Instant
 
-class ProductOffersProcessor: Processor<Long, ProductOffers, Long, ProductBestOffer> {
+class ProductOffersProcessor: Processor<Long, ProductOffers, Long, ProductBestOffer>, Logging {
     private lateinit var context: ProcessorContext<Long, ProductBestOffer>
     private lateinit var bestOfferStore: KeyValueStore<Long, ProductBestOffer>
 
@@ -23,7 +24,7 @@ class ProductOffersProcessor: Processor<Long, ProductOffers, Long, ProductBestOf
     }
 
     override fun process(productOffersRecord: Record<Long, ProductOffers>) {
-        val stateHeaderValue = String(productOffersRecord.headers().lastHeader(Companion.MM_EVENT_STATE_HEADER).value())
+        val stateHeaderValue = String(productOffersRecord.headers().lastHeader(MM_EVENT_STATE_HEADER).value())
         val productOffers = productOffersRecord.value()
 
         when (stateHeaderValue) {
@@ -41,6 +42,9 @@ class ProductOffersProcessor: Processor<Long, ProductOffers, Long, ProductBestOf
             ProductBestOfferFactory.fromProductOffers(productOffers, productOffersBestOffer)
 
         this.bestOfferStore.put(productOffersMMID, productBestOffer)
+
+        logger.info("Adding to bestOfferStore key: $productOffersMMID, value: $productBestOffer")
+
         this.context.forward(
             Record(
                 productOffersMMID,
@@ -50,34 +54,40 @@ class ProductOffersProcessor: Processor<Long, ProductOffers, Long, ProductBestOf
         )
     }
 
-    private fun handleOnCreatedEvent(productOffers: ProductOffers) =
-        this.putOnStoreAndForwardBestOfferEvent(
-            productOffers,
-            RecordHeaders().add(Companion.BEST_OFFER_EVENT_HEADER, BestOfferHeaders.LIFT_CREATED.name.encodeToByteArray())
-        )
+    private fun handleOnCreatedEvent(productOffers: ProductOffers) = this.putOnStoreAndForwardBestOfferEvent(
+        productOffers,
+        RecordHeaders().add(BEST_OFFER_EVENT_HEADER, BestOfferHeaders.LIFT_CREATED.name.encodeToByteArray())
+    )
 
     private fun handleOnUpdatedEvent(productOffers: ProductOffers) {
+        val bestOfferStored = bestOfferStore.get(productOffers.mmId)
+        logger.info("[LAST-EVENT]: $bestOfferStored")
+        logger.info("[NEW-EVENT]: $productOffers")
 
-        if (bestOfferStore.get(productOffers.mmId) != null) {
-            bestOfferStore.delete(productOffers.mmId)
-        }
+//        if (bestOfferStored != null) {
+//            logger.info("[LAST-EVENT]: $bestOfferStored")
+//            bestOfferStore.delete(productOffers.mmId)
+//        }
 
         this.putOnStoreAndForwardBestOfferEvent(
             productOffers,
-            RecordHeaders().add(Companion.BEST_OFFER_EVENT_HEADER, BestOfferHeaders.LIFT_UPDATED.name.encodeToByteArray())
+            RecordHeaders().add(BEST_OFFER_EVENT_HEADER, BestOfferHeaders.LIFT_UPDATED.name.encodeToByteArray())
         )
     }
 
     private fun handleOnDeleteEvent(productOffers: ProductOffers) {
         val productOffersMMID = productOffers.mmId
-        bestOfferStore.delete(productOffers.mmId)
+//        bestOfferStore.delete(productOffers.mmId)
+
+        logger.info("Deleting to bestOfferStore key: $productOffers.mmId")
+
         this.context.forward(
             Record(
                 productOffersMMID,
                 ProductBestOffer(mmId = productOffersMMID),
                 Instant.now().toEpochMilli()
             ).withHeaders(
-                RecordHeaders().add(Companion.BEST_OFFER_EVENT_HEADER, BestOfferHeaders.LIFT_DELETED.name.encodeToByteArray())
+                RecordHeaders().add(BEST_OFFER_EVENT_HEADER, BestOfferHeaders.LIFT_DELETED.name.encodeToByteArray())
             )
         )
     }

@@ -4,6 +4,7 @@ import com.poc.kafkastreams.configuration.randomLong
 import com.poc.kafkastreams.configuration.randomLongs
 import com.poc.kafkastreams.configuration.randomUUID
 import io.github.serpro69.kfaker.Faker
+import kotlin.math.absoluteValue
 
 
 class ProductOffersFactory private constructor() {
@@ -14,7 +15,7 @@ class ProductOffersFactory private constructor() {
         fun withRandomCategories(): ProductOffers {
             val randomCategory = Long.randomLong()
             return ProductOffers(
-                mmId = Long.randomLong(),
+                mmId = Long.randomLong().absoluteValue,
                 masterCategoryId = randomCategory,
                 merchandisingCategories = MerchandisingCategories(
                     main = randomCategory,
