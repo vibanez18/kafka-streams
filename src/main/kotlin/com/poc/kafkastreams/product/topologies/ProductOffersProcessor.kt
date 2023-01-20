@@ -20,7 +20,7 @@ class ProductOffersProcessor: Processor<Long, ProductOffers, Long, ProductBestOf
 
     override fun init(context: ProcessorContext<Long, ProductBestOffer>) {
         this.context = context
-        bestOfferStore = context.getStateStore(ProductOffersProcessorSupplier.STORE_NAME)
+        this.bestOfferStore = context.getStateStore(ProductOffersProcessorSupplier.STORE_NAME)
     }
 
     override fun process(productOffersRecord: Record<Long, ProductOffers>) {
@@ -41,11 +41,11 @@ class ProductOffersProcessor: Processor<Long, ProductOffers, Long, ProductBestOf
         val productBestOffer =
             ProductBestOfferFactory.fromProductOffers(productOffers, productOffersBestOffer)
 
-        this.bestOfferStore.put(productOffersMMID, productBestOffer)
+        bestOfferStore.put(productOffersMMID, productBestOffer)
 
         logger.info("Adding to bestOfferStore key: $productOffersMMID, value: $productBestOffer")
 
-        this.context.forward(
+        context.forward(
             Record(
                 productOffersMMID,
                 productBestOffer,
@@ -60,24 +60,21 @@ class ProductOffersProcessor: Processor<Long, ProductOffers, Long, ProductBestOf
     )
 
     private fun handleOnUpdatedEvent(productOffers: ProductOffers) {
-        val bestOfferStored = bestOfferStore.get(productOffers.mmId)
+        var bestOfferStored = bestOfferStore.get(productOffers.mmId)
         logger.info("[LAST-EVENT]: $bestOfferStored")
-        logger.info("[NEW-EVENT]: $productOffers")
 
-//        if (bestOfferStored != null) {
-//            logger.info("[LAST-EVENT]: $bestOfferStored")
-//            bestOfferStore.delete(productOffers.mmId)
-//        }
-
-        this.putOnStoreAndForwardBestOfferEvent(
+        putOnStoreAndForwardBestOfferEvent(
             productOffers,
             RecordHeaders().add(BEST_OFFER_EVENT_HEADER, BestOfferHeaders.LIFT_UPDATED.name.encodeToByteArray())
         )
+
+        bestOfferStored = bestOfferStore.get(productOffers.mmId)
+        logger.info("[NEW-EVENT]: $bestOfferStored")
     }
 
     private fun handleOnDeleteEvent(productOffers: ProductOffers) {
         val productOffersMMID = productOffers.mmId
-//        bestOfferStore.delete(productOffers.mmId)
+        bestOfferStore.delete(productOffers.mmId)
 
         logger.info("Deleting to bestOfferStore key: $productOffers.mmId")
 
