@@ -1,5 +1,6 @@
 package com.poc.kafkastreams.product.producer
 
+import com.poc.kafkastreams.configuration.randomLong
 import com.poc.kafkastreams.product.configuration.ProductOffersStreamsConfig
 import com.poc.kafkastreams.product.model.ProductOffers
 import com.poc.kafkastreams.product.model.ProductOffersFactory
@@ -28,7 +29,7 @@ class ProductOffersProducer(
 ): Logging {
     companion object {
         private const val MM_EVENT_STATE_HEADER = "mm-event-state"
-        val mmIdsCache = mutableSetOf<Long>()
+        val mmIdsCache = mutableListOf<Long>()
     }
 
     @EventListener(ApplicationStartedEvent::class)
@@ -40,35 +41,35 @@ class ProductOffersProducer(
 
     private fun createProductOffers(): ProducerRecord<Long, ProductOffers> {
         val productOffers = ProductOffersFactory.withRandomCategories()
-        val randomHeader = if (mmIdsCache.isEmpty()) HeaderType.CREATED else HeaderType.values().random()
+        val randomHeader = if (!mmIdsCache.contains(productOffers.mmId))
+            HeaderType.CREATED else
+                HeaderType.values().random()
         val randomHeaderByteArray = RecordHeaders().add(MM_EVENT_STATE_HEADER, randomHeader.name.toByteArray())
+        val producerRecord: ProducerRecord<Long, ProductOffers>
 
         when(randomHeader) {
             HeaderType.CREATED -> {
-                this.createProducerRecord(productOffers, randomHeaderByteArray.first())
+                producerRecord = createProducerRecord(productOffers, randomHeaderByteArray.first())
                 mmIdsCache.add(productOffers.mmId)
                 logger.info("Sending CREATED event with mmId: ${productOffers.mmId}")
             }
             HeaderType.UPDATED -> {
-                val updatedProductOffer = productOffers.copy(mmId = mmIdsCache.random())
-                this.createProducerRecord(updatedProductOffer, randomHeaderByteArray.first())
-                logger.info("Sending UPDATED event with mmId: ${updatedProductOffer.mmId}")
+                val updatedProductOffer = productOffers.copy(masterCategoryId = Long.randomLong())
+                producerRecord = createProducerRecord(updatedProductOffer, randomHeaderByteArray.first())
+                logger.info("Sending UPDATED event with mmId: ${productOffers.mmId}")
             }
             HeaderType.DELETED -> {
-                val deletedProductOffer = productOffers.copy(mmId = mmIdsCache.random())
-                this.createProducerRecord(productOffers.copy(), randomHeaderByteArray.first())
+                producerRecord = createProducerRecord(productOffers.copy(), randomHeaderByteArray.first())
                 mmIdsCache.remove(productOffers.mmId)
-                logger.info("Sending DELETED event with mmId: ${deletedProductOffer.mmId}")
+                logger.info("Sending DELETED event with mmId: ${productOffers.mmId}")
             }
         }
 
-        return this.createProducerRecord(productOffers, randomHeaderByteArray.first())
-
+        return producerRecord
     }
-
     private fun createProducerRecord(productOffers: ProductOffers, header: Header) = ProducerRecord(
         ProductOffersStreamsConfig.PRODUCT_OFFER_FAT_EVENT_TOPIC,
-        Faker().random.nextLong(),
+        productOffers.mmId,
         productOffers
     ).apply { this.headers().add(header) }
 }

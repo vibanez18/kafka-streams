@@ -1,8 +1,9 @@
 package com.poc.kafkastreams.configuration
 
 import io.github.serpro69.kfaker.Faker
+import kotlin.random.Random
 
-fun Long.Companion.randomLong(): Long = Faker().random.nextLong()
+fun Long.Companion.randomLong(): Long = Random.nextLong(0, 10)
 fun Long.Companion.randomLongs(): List<Long> =
     listOf(
         this.randomLong(),
